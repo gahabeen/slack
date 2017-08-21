@@ -72,7 +72,7 @@ module.exports = api => {
     });
 
   /**
- * Fetch last message of a channel
+ * Fetches last message of a channel
  * See: unofficial method
  */
   api.channels.lastMessage = async (id, options) =>
@@ -110,7 +110,7 @@ module.exports = api => {
     });
 
   /**
- * Get id of last message of a channel by channel name
+ * Get timestamp of last message of a channel by channel name
  * See: unofficial method
  */
   api.channels.getTimestampOfLastMessageByChannelName = async (name, options) =>
@@ -124,7 +124,7 @@ module.exports = api => {
     });
 
   /**
- * Fetch last message starting by a text.
+ * Fetches last message starting by a text.
  * See: unofficial method
  */
   api.channels.lastMessageStartingWith = async (
@@ -145,7 +145,7 @@ module.exports = api => {
     });
 
   /**
- * Fetch last message starting by a text by a channel name.
+ * Fetches last message starting by a text by a channel name.
  * See: unofficial method
  */
   api.channels.lastMessageStartingWithByChannelName = async (
@@ -163,7 +163,7 @@ module.exports = api => {
     });
 
   /**
- * Get id of last message of a channel by channel name
+ * Get timestamp of last message of a channel by channel name
  * See: unofficial method
  */
   api.channels.getTimestampOfLastMessageStartingWithByChannelName = async (

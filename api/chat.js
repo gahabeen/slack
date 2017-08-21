@@ -36,9 +36,15 @@ module.exports = api => {
 	 * Deletes a message by channel name
 	 * See: https://api.slack.com/methods/chat.delete
 	 */
-  api.chat.deleteLastMessageStartingWithByChannelName = async (name, messageStartingWith) =>
+  api.chat.deleteLastMessageStartingWithByChannelName = async (
+    name,
+    messageStartingWith
+  ) =>
     api.utils.handleError(async () => {
-      let ts = await api.channels.getTimestampOfLastMessageStartingWithByChannelName(name, messageStartingWith);
+      let ts = await api.channels.getTimestampOfLastMessageStartingWithByChannelName(
+        name,
+        messageStartingWith
+      );
       return await api.chat.deleteByChannelName(name, ts);
     });
 
@@ -81,7 +87,7 @@ module.exports = api => {
 	 * Provide custom unfurl behavior for user-posted URLs by channel name
 	 * See: https://api.slack.com/methods/chat.unfurl
 	 */
-  api.chat.unfurlByChannelNameAndLastMessageStartingWithByChannelName = async (
+  api.chat.unfurlLastMessageStartingWithByChannelName = async (
     name,
     messageStartingText,
     unfurls,
@@ -157,6 +163,32 @@ module.exports = api => {
     });
 
   /**
+	 * Sends an ephemeral message to a user name in a channel.
+	 * See: https://api.slack.com/methods/chat.postEphemeral
+	 */
+  api.chat.postEphemeralByUserName = async (id, userName, text, options = {}) =>
+    api.utils.handleError(async () => {
+      let userId = api.users.getIdByUserName(userName);
+      return await api.chat.postEphemeral(id, userId, text, options);
+    });
+
+  /**
+	 * Sends an ephemeral message to a user name in a channel by its name.
+	 * See: https://api.slack.com/methods/chat.postEphemeral
+	 */
+  api.chat.postEphemeralByChannelNameAndUserName = async (
+    name,
+    userName,
+    text,
+    options = {}
+  ) =>
+    api.utils.handleError(async () => {
+      let id = api.channels.getIdByChannelName(name);
+      let userId = api.users.getIdByUserName(userName);
+      return await api.chat.postEphemeral(id, userId, text, options);
+    });
+
+  /**
 	 * Updates a message.
 	 * See: https://api.slack.com/methods/chat.update
 	 */
@@ -178,13 +210,13 @@ module.exports = api => {
 	 */
   api.chat.updateByChannelName = async (
     name,
-    text,
+    newText,
     messageTimestamp,
     options = {}
   ) =>
     api.utils.handleError(async () => {
       let id = await api.channels.getIdByChannelName(name);
-      return await api.chat.update(id, text, messageTimestamp, options);
+      return await api.chat.update(id, newText, messageTimestamp, options);
     });
 
   /**
@@ -208,7 +240,7 @@ module.exports = api => {
 	 * Updates a message by channel name
  * See: unofficial method
 	 */
-  api.chat.updateByChannelNameAndLastMessageStartingWithByChannelName = async (
+  api.chat.updateLastMessageStartingWithByChannelName = async (
     name,
     messageStartingText,
     newText,
