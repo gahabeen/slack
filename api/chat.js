@@ -13,6 +13,36 @@ module.exports = api => {
     );
 
   /**
+	 * Deletes a message by channel name
+	 * See: https://api.slack.com/methods/chat.delete
+	 */
+  api.chat.deleteByChannelName = async (name, messageTimestamp) =>
+    api.utils.handleError(async () => {
+      let id = await api.channels.getIdByChannelName(name);
+      return await api.chat.delete(id, messageTimestamp);
+    });
+
+  /**
+	 * Deletes a message by channel name
+	 * See: https://api.slack.com/methods/chat.delete
+	 */
+  api.chat.deleteLastMessageByChannelName = async name =>
+    api.utils.handleError(async () => {
+      let ts = await api.channels.getTimestampOfLastMessageByChannelName(name);
+      return await api.chat.deleteByChannelName(name, ts);
+    });
+
+  /**
+	 * Deletes a message by channel name
+	 * See: https://api.slack.com/methods/chat.delete
+	 */
+  api.chat.deleteLastMessageStartingWithByChannelName = async (name, messageStartingWith) =>
+    api.utils.handleError(async () => {
+      let ts = await api.channels.getTimestampOfLastMessageStartingWithByChannelName(name, messageStartingWith);
+      return await api.chat.deleteByChannelName(name, ts);
+    });
+
+  /**
 	 * Provide custom unfurl behavior for user-posted URLs
 	 * See: https://api.slack.com/methods/chat.unfurl
 	 */
@@ -20,7 +50,7 @@ module.exports = api => {
     api.utils.handleError(
       async () =>
         await api.utils.post(
-          "chat.delete",
+          "chat.unfurl",
           Object.assign(
             {
               channel: id,
@@ -58,7 +88,7 @@ module.exports = api => {
     options = {}
   ) =>
     api.utils.handleError(async () => {
-      let ts = await api.channels.getTimestampOflastMessageStartingWithByChannelName(
+      let ts = await api.channels.getTimestampOfLastMessageStartingWithByChannelName(
         name,
         messageStartingText,
         options
@@ -158,8 +188,25 @@ module.exports = api => {
     });
 
   /**
+	 * Updates the last message by channel name
+ * See: unofficial method
+	 */
+  api.chat.updateLastMessageByChannelName = async (
+    name,
+    newText,
+    options = {}
+  ) =>
+    api.utils.handleError(async () => {
+      let ts = await api.channels.getTimestampOfLastMessageByChannelName(
+        name,
+        options
+      );
+      return await api.chat.updateByChannelName(name, newText, ts, options);
+    });
+
+  /**
 	 * Updates a message by channel name
-	 * See: https://api.slack.com/methods/chat.update
+ * See: unofficial method
 	 */
   api.chat.updateByChannelNameAndLastMessageStartingWithByChannelName = async (
     name,
@@ -168,7 +215,7 @@ module.exports = api => {
     options = {}
   ) =>
     api.utils.handleError(async () => {
-      let ts = await api.channels.getTimestampOflastMessageStartingWithByChannelName(
+      let ts = await api.channels.getTimestampOfLastMessageStartingWithByChannelName(
         name,
         messageStartingText,
         options
@@ -180,39 +227,14 @@ module.exports = api => {
  * Sends a message to a channel.
  * See: https://api.slack.com/methods/chat.postMessage
  */
-  api.chat.postMessage = async (id, text, options = {}) =>
-    api.utils.handleError(async () => {
-      let messageObject = Object.assign(
-        {
-          as_user: null,
-          attachments: [],
-          icon_emoji: null,
-          icon_url: null,
-          link_names: true,
-          parse: "none",
-          reply_broadcast: false,
-          thread_ts: null,
-          unfurl_links: false,
-          unfurl_media: false
-        },
-        options
-      );
-
-      return await api.utils.post(
-        "chat.postMessage",
-        Object.assign({ channel: id, text: text }, messageObject)
-      );
-    });
-
-  /**
- * Sends a message to a channel.
- * See: https://api.slack.com/methods/chat.postMessage
- */
-  api.chat.postMessageByChannelName = async (name, text, options = {}) =>
-    api.utils.handleError(async () => {
-      let id = await api.channels.getIdByChannelName(name);
-      return await api.chat.postMessage(id, text, options);
-    });
+  api.chat.postMessage = async (idOrName, text, options = {}) =>
+    api.utils.handleError(
+      async () =>
+        await api.utils.post(
+          "chat.postMessage",
+          Object.assign({ channel: idOrName, text: text }, options)
+        )
+    );
 
   /**
  * Sends a dynamically build message to a channel.

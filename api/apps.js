@@ -9,7 +9,7 @@ module.exports = api => {
       if (response.true) {
         return reponse.info;
       } else {
-        throw response;
+        throw `api.apps.permissions.info() returns ${response}`;
       }
     });
 

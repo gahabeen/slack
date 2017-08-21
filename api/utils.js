@@ -4,12 +4,11 @@ module.exports = api => {
     return `${api.variables.baseUrl}/${method}`;
   };
 
-  api.utils.handleError = fn => {
+  api.utils.handleError = async fn => {
     try {
-      // return await fn();
-      return fn();
+      return await fn();
     } catch (error) {
-      throw error;
+      throw `Error: ${error}`;
     }
   };
 

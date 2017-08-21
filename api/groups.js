@@ -11,7 +11,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.group;
       } else {
-        throw response;
+        throw `api.groups.create(${name}) returns ${response}`;
       }
     });
 
@@ -30,7 +30,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.group;
       } else {
-        throw response;
+        throw `api.groups.rename(${id},${newName},${validate}) returns ${response}`;
       }
     });
 
@@ -57,7 +57,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.messages;
       } else {
-        throw response;
+        throw `api.groups.history(${id},${options}) returns ${response}`;
       }
     });
 
@@ -78,17 +78,11 @@ module.exports = api => {
   api.groups.lastMessage = async (id, options) =>
     api.utils.handleError(async () => {
       let messages = await api.groups.history(id, options);
-      return messages[0] || null;
-    });
-
-  /**
- * Get id of last message of a group
- * See: unofficial method
- */
-  api.groups.getIdOflastMessage = async (id, options) =>
-    api.utils.handleError(async () => {
-      let messages = await api.groups.history(id, options);
-      return messages[0].id || null;
+      if (Array.isArray(messages) && messages.length > 0) {
+        return messages[0];
+      } else {
+        throw `api.groups.lastMessage(${id},${options}) returns ${messages}`;
+      }
     });
 
   /**
@@ -97,39 +91,36 @@ module.exports = api => {
  */
   api.groups.getTimestampOfLastMessage = async (id, options) =>
     api.utils.handleError(async () => {
-      let messages = await api.groups.history(id, options);
-      return messages[0].ts || null;
+      let message = await api.groups.lastMessage(id, options);
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.groups.getTimestampOfLastMessageByGroupName(${name},${options}) returns ${message}`;
+      }
     });
 
   /**
  * Fetch last message of a group by group name
  * See: unofficial method
  */
-  api.groups.lastMessageByGroupName = async (id, options) =>
+  api.groups.lastMessageByGroupName = async (name, options) =>
     api.utils.handleError(async () => {
       let id = await api.groups.getIdByGroupName(name);
-      let messages = await api.groups.lastMessage(id, options);
-      return messages[0] || null;
+      return await api.groups.lastMessage(id, options);
     });
 
   /**
  * Get id of last message of a group by group name
  * See: unofficial method
  */
-  api.groups.getIdOflastMessageByGroupName = async (name, options) =>
+  api.groups.getTimestampOfLastMessageByGroupName = async (name, options) =>
     api.utils.handleError(async () => {
-      let messages = await api.groups.lastMessageByGroupName(name, options);
-      return messages[0].id || null;
-    });
-
-  /**
- * Get id of last message of a group by group name
- * See: unofficial method
- */
-  api.groups.getTimestampOflastMessageByGroupName = async (name, options) =>
-    api.utils.handleError(async () => {
-      let messages = await api.groups.lastMessageByGroupName(name, options);
-      return messages[0].ts || null;
+      let message = await api.groups.lastMessageByGroupName(name, options);
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.groups.getTimestampOfLastMessageByGroupName(${name},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -137,35 +128,20 @@ module.exports = api => {
  * See: unofficial method
  */
   api.groups.lastMessageStartingWith = async (
-    messageStartingText,
     id,
+    messageStartingText,
     options
   ) =>
     api.utils.handleError(async () => {
       let messages = await api.groups.history(id, options);
-      return (
-        messages.find(message =>
-          message.text.startsWith(messageStartingText)
-        ) || null
+      let message = messages.find(message =>
+        message.text.startsWith(messageStartingText)
       );
-    });
-
-  /**
- * Fetch last message id starting by a text.
- * See: unofficial method
- */
-  api.groups.getIdOfLastMessageStartingWith = async (
-    messageStartingText,
-    id,
-    options
-  ) =>
-    api.utils.handleError(async () => {
-      let group = await api.groups.lastMessageStartingWith(
-        messageStartingText,
-        id,
-        options
-      );
-      return group.id || null;
+      if (message) {
+        return message;
+      } else {
+        throw `api.groups.lastMessageStartingWith(${id},${messageStartingWith},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -173,35 +149,39 @@ module.exports = api => {
  * See: unofficial method
  */
   api.groups.lastMessageStartingWithByGroupName = async (
-    messageStartingText,
     name,
+    messageStartingText,
     options
   ) =>
     api.utils.handleError(async () => {
-      let messages = await api.groups.historyByGroupName(name, options);
-      return (
-        messages.find(message =>
-          message.text.startsWith(messageStartingText)
-        ) || null
+      let id = await api.groups.getIdByGroupName(name);
+      return await api.groups.lastMessageStartingWith(
+        id,
+        messageStartingText,
+        options
       );
     });
 
   /**
- * Fetch last message id starting by a text by a group name.
+ * Get id of last message of a group by group name
  * See: unofficial method
  */
-  api.groups.getIdOfLastMessageStartingWithByGroupName = async (
-    messageStartingText,
+  api.groups.getTimestampOfLastMessageStartingWithByGroupName = async (
     name,
+    messageStartingWith,
     options
   ) =>
     api.utils.handleError(async () => {
-      let group = await api.groups.lastMessageStartingWithByGroupName(
-        messageStartingText,
+      let message = await api.groups.lastMessageStartingWithByGroupName(
         name,
+        messageStartingWith,
         options
       );
-      return group.id || null;
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.groups.getTimestampOfLastMessageStartingWithByGroupName(${name},${messageStartingWith},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -214,7 +194,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.groups;
       } else {
-        throw response;
+        throw `api.groups.list() returns ${response}`;
       }
     });
 
@@ -225,7 +205,12 @@ module.exports = api => {
   api.groups.findByGroupName = async name =>
     api.utils.handleError(async () => {
       let groupsList = await api.groups.list();
-      return groupsList.find(group => group.name === name) || null;
+      let group = groupsList.find(group => group.name === name);
+      if (group) {
+        return group;
+      } else {
+        throw `api.groups.findByGroupName(${name}) returns ${group}`;
+      }
     });
 
   /**
@@ -235,7 +220,11 @@ module.exports = api => {
   api.groups.getIdByGroupName = async name =>
     api.utils.handleError(async () => {
       let foundGroup = await api.groups.findByGroupName(name);
-      return foundGroup.id || null;
+      if (foundGroup && foundGroup.id) {
+        return foundGroup.id;
+      } else {
+        throw foundGroup;
+      }
     });
 
   /**
@@ -250,7 +239,7 @@ module.exports = api => {
       if (response.true) {
         return reponse.group;
       } else {
-        throw response;
+        throw `api.groups.archive(${id}) returns ${response}`;
       }
     });
 
@@ -484,10 +473,10 @@ module.exports = api => {
 * Sets the read cursor in a group by a group name and the latest message by group name.
 * See: unofficial method
 */
-  api.groups.markByGroupNameAndLastMessageByGroupName = async (name) =>
+  api.groups.markByGroupNameAndLastMessageByGroupName = async name =>
     api.utils.handleError(async () => {
       let id = await api.groups.getIdByGroupName(name);
-      let ts = await api.groups.getTimestampOflastMessageByGroupName(name)
+      let ts = await api.groups.getTimestampOfLastMessageByGroupName(name);
       return await api.groups.mark(id, ts);
     });
 };

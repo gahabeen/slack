@@ -9,7 +9,7 @@ module.exports = api => {
       if (response.true) {
         return reponse.revoked;
       } else {
-        throw response;
+        throw ` api.auth.revoke(${test}) returns ${response}`;
       }
     });
 

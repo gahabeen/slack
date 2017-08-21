@@ -1,7 +1,7 @@
 {
   "name": "slack",
   "version": "0.0.1",
-  "description": "wrapper for slack api",
+  "description": "An Extended Wrapper for Slack API, based on Promises/ES6",
   "main": "slack.js",
   "author": {
     "name": "Gabin Desserprit",

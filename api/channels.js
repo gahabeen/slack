@@ -11,7 +11,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.channel;
       } else {
-        throw response;
+        throw `api.channels.create(${name}) returns ${response}`;
       }
     });
 
@@ -30,7 +30,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.channel;
       } else {
-        throw response;
+        throw `api.channels.rename(${id},${newName},${validate}) returns ${response}`;
       }
     });
 
@@ -57,7 +57,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.messages;
       } else {
-        throw response;
+        throw `api.channels.history(${id},${options}) returns ${response}`;
       }
     });
 
@@ -78,17 +78,11 @@ module.exports = api => {
   api.channels.lastMessage = async (id, options) =>
     api.utils.handleError(async () => {
       let messages = await api.channels.history(id, options);
-      return messages[0] || null;
-    });
-
-  /**
- * Get id of last message of a channel
- * See: unofficial method
- */
-  api.channels.getIdOflastMessage = async (id, options) =>
-    api.utils.handleError(async () => {
-      let message = await api.channels.lastMessage(id, options);
-      return message.id || null;
+      if (Array.isArray(messages) && messages.length > 0) {
+        return messages[0];
+      } else {
+        throw `api.channels.lastMessage(${id},${options}) returns ${messages}`;
+      }
     });
 
   /**
@@ -98,38 +92,35 @@ module.exports = api => {
   api.channels.getTimestampOfLastMessage = async (id, options) =>
     api.utils.handleError(async () => {
       let message = await api.channels.lastMessage(id, options);
-      return message.ts || null;
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.channels.getTimestampOfLastMessageByChannelName(${name},${options}) returns ${message}`;
+      }
     });
 
   /**
  * Fetch last message of a channel by channel name
  * See: unofficial method
  */
-  api.channels.lastMessageByChannelName = async (id, options) =>
+  api.channels.lastMessageByChannelName = async (name, options) =>
     api.utils.handleError(async () => {
       let id = await api.channels.getIdByChannelName(name);
-      let messages = await api.channels.lastMessage(id, options);
-      return messages[0] || null;
+      return await api.channels.lastMessage(id, options);
     });
 
   /**
  * Get id of last message of a channel by channel name
  * See: unofficial method
  */
-  api.channels.getIdOflastMessageByChannelName = async (name, options) =>
+  api.channels.getTimestampOfLastMessageByChannelName = async (name, options) =>
     api.utils.handleError(async () => {
       let message = await api.channels.lastMessageByChannelName(name, options);
-      return message.id || null;
-    });
-
-  /**
- * Get id of last message of a channel by channel name
- * See: unofficial method
- */
-  api.channels.getTimestampOflastMessageByChannelName = async (name, options) =>
-    api.utils.handleError(async () => {
-      let message = await api.channels.lastMessageByChannelName(name, options);
-      return messages.ts || null;
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.channels.getTimestampOfLastMessageByChannelName(${name},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -143,11 +134,14 @@ module.exports = api => {
   ) =>
     api.utils.handleError(async () => {
       let messages = await api.channels.history(id, options);
-      return (
-        messages.find(message =>
-          message.text.startsWith(messageStartingText)
-        ) || null
+      let message = messages.find(message =>
+        message.text.startsWith(messageStartingText)
       );
+      if (message) {
+        return message;
+      } else {
+        throw `api.channels.lastMessageStartingWith(${id},${messageStartingWith},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -172,7 +166,7 @@ module.exports = api => {
  * Get id of last message of a channel by channel name
  * See: unofficial method
  */
-  api.channels.getTimestampOflastMessageStartingWithByChannelName = async (
+  api.channels.getTimestampOfLastMessageStartingWithByChannelName = async (
     name,
     messageStartingWith,
     options
@@ -183,43 +177,11 @@ module.exports = api => {
         messageStartingWith,
         options
       );
-      return message && message.ts ? message.ts : null;
-    });
-
-  /**
- * Fetch last message id starting by a text.
- * See: unofficial method
- */
-  api.channels.getIdOfLastMessageStartingWith = async (
-    id,
-    messageStartingText,
-    options
-  ) =>
-    api.utils.handleError(async () => {
-      let message = await api.channels.lastMessageStartingWith(
-        id,
-        messageStartingText,
-        options
-      );
-      return message && message.id ? message.id : null;
-    });
-
-  /**
- * Fetch last message id starting by a text by a channel name.
- * See: unofficial method
- */
-  api.channels.getIdOfLastMessageStartingWithByChannelName = async (
-    name,
-    messageStartingText,
-    options
-  ) =>
-    api.utils.handleError(async () => {
-      let channel = await api.channels.lastMessageStartingWithByChannelName(
-        name,
-        messageStartingText,
-        options
-      );
-      return channel.id || null;
+      if (message && message.ts) {
+        return message.ts;
+      } else {
+        throw `api.channels.getTimestampOfLastMessageStartingWithByChannelName(${name},${messageStartingWith},${options}) returns ${message}`;
+      }
     });
 
   /**
@@ -232,7 +194,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.channels;
       } else {
-        throw response;
+        throw `api.channels.list() returns ${response}`;
       }
     });
 
@@ -243,7 +205,12 @@ module.exports = api => {
   api.channels.findByChannelName = async name =>
     api.utils.handleError(async () => {
       let channelsList = await api.channels.list();
-      return channelsList.find(channel => channel.name === name) || null;
+      let channel = channelsList.find(channel => channel.name === name);
+      if (channel) {
+        return channel;
+      } else {
+        throw `api.channels.findByChannelName(${name}) returns ${channel}`;
+      }
     });
 
   /**
@@ -253,7 +220,11 @@ module.exports = api => {
   api.channels.getIdByChannelName = async name =>
     api.utils.handleError(async () => {
       let foundChannel = await api.channels.findByChannelName(name);
-      return foundChannel.id || null;
+      if (foundChannel && foundChannel.id) {
+        return foundChannel.id;
+      } else {
+        throw foundChannel;
+      }
     });
 
   /**
@@ -268,7 +239,7 @@ module.exports = api => {
       if (response.true) {
         return reponse.channel;
       } else {
-        throw response;
+        throw `api.channels.archive(${id}) returns ${response}`;
       }
     });
 
@@ -505,7 +476,7 @@ module.exports = api => {
   api.channels.markByChannelNameAndLastMessageByChannelName = async name =>
     api.utils.handleError(async () => {
       let id = await api.channels.getIdByChannelName(name);
-      let ts = await api.channels.getTimestampOflastMessageByChannelName(name);
+      let ts = await api.channels.getTimestampOfLastMessageByChannelName(name);
       return await api.channels.mark(id, ts);
     });
 };

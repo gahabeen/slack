@@ -3,7 +3,7 @@ module.exports = api => {
  * 	Lists all users in a Slack team.
  * See: https://api.slack.com/methods/users.list
  */
-  api.users.list = async (limit = 20, presence = false, options) =>
+  api.users.list = async (limit = 20, presence = false, options = {}) =>
     api.utils.handleError(async () => {
       let response = await api.utils.post(
         "users.list",
@@ -12,7 +12,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.members;
       } else {
-        throw (response);
+        throw `api.users.list(${limit}, ${presence}, ${JSON.stringify(options)}) returns ${response}`;
       }
     });
 
@@ -54,7 +54,7 @@ module.exports = api => {
       if (response.ok === true) {
         return response.profile;
       } else {
-        throw (response);
+        throw `api.users.profile.get(${id}, ${include_labels}) returns ${response}`;
       }
     });
 
