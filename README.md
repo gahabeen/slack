@@ -500,7 +500,7 @@ Build the url for the request.
 *Custom method*
 
 - #### .utils.post(method, body)
-Post a request to the slack API.
+Post a request to the slack API.  
 *Custom method*
 
 - #### .utils.handleError(fn)
