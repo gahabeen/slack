@@ -15,136 +15,153 @@ function Slack(apiToken) {
     return request.post({ url: this.buildUrl(method), json: true }).form(body);
   };
 
+  let handleError = function(fn) {
+    try {
+      return fn();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   let api = {
     channels: {},
     groups: {},
     chat: {}
   };
 
+  /**
+	 * Checks API calling code.
+	 * See: https://api.slack.com/methods/api.test
+	 */
+  api.test = async () =>
+    handleError(async () => await parent.slackApi("api.test", {}));
+
   // Channels
 
-  api.channels.create = async function(name) {
-    try {
-      return await parent.slackApi("channels.create", {
-        name: name.replace(/\#+/, "")
-      });
-    } catch (error) {
-      throw error;
-    }
-  };
+  /**
+	 * Creates a channel.
+	 * See: https://api.slack.com/methods/channels.create
+	 */
+  api.channels.create = async name =>
+    handleError(
+      async () =>
+        await parent.slackApi("channels.create", {
+          name: name.replace(/\#+/, "")
+        })
+    );
 
-  api.channels.list = async function() {
-    try {
+  /**
+	 * Lists all channels in a Slack team.
+	 * See: https://api.slack.com/methods/channels.list
+	 */
+  api.channels.list = async () =>
+    handleError(async () => {
       let response = await parent.slackApi("channels.list", {});
       if (response.ok === true) {
         return response.channels;
       } else {
         throw response;
       }
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
-  api.channels.findByName = async function(name) {
-    try {
+  /**
+	 * Return a channel object from a given name
+	 * See: unofficial method
+	 */
+  api.channels.findByName = async name =>
+    handleError(async () => {
       let channelsList = await api.channels.list();
       let channel = channelsList.find(channel => channel.name === name) || null;
       return channel;
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
-  api.channels.getIdByName = async function(name) {
-    try {
+  /**
+	 * Return an id from a given channel name
+	 * See: unofficial method
+	 */
+  api.channels.getIdByName = async name =>
+    handleError(async () => {
       let foundChannel = await api.channels.findByName(name);
       return foundChannel && foundChannel.id ? foundChannel.id : null;
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
-  api.channels.archive = async function(id) {
-    try {
-      return await parent.slackApi("channels.archive", {
-        channel: id
-      });
-    } catch (error) {
-      throw error;
-    }
-  };
+  /**
+	 * Archives a channel.
+	 * See: https://api.slack.com/methods/channels.archive
+	 */
+  api.channels.archive = async id =>
+    handleError(
+      async () =>
+        await parent.slackApi("channels.archive", {
+          channel: id
+        })
+    );
 
-  api.channels.archiveByName = async function(name) {
-    try {
+  /**
+	 * Archives a channel by name
+	 * See: unofficial method
+	 */
+  api.channels.archiveByName = async name =>
+    handleError(async () => {
       let id = await api.channels.getIdByName(name);
       return await api.channels.archive(id);
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
   // Groups
 
-  api.groups.create = async function(name) {
-    try {
-      return await parent.slackApi("groups.create", {
-        name: name.replace(/\#+/, "")
-      });
-    } catch (error) {
-      throw error;
-    }
-  };
+  /**
+	 * Creates a private channel.
+	 * See: https://api.slack.com/methods/groups.create
+	 */
+  api.groups.create = async name =>
+    handleError(
+      async () =>
+        await parent.slackApi("groups.create", {
+          name: name.replace(/\#+/, "")
+        })
+    );
 
-  api.groups.list = async function() {
-    try {
-      return await parent.slackApi("groups.list", {});
-    } catch (error) {
-      throw error;
-    }
-  };
+  /**
+	 * 	Lists private channels that the calling user has access to.
+	 * See: https://api.slack.com/methods/groups.list
+	 */
+  api.groups.list = async () =>
+    handleError(async () => await parent.slackApi("groups.list", {}));
 
-  api.groups.findByName = async function(name) {
-    try {
+  /**
+	 * Return a private channel object from a given name
+	 * See: unofficial method
+	 */
+  api.groups.findByName = async name =>
+    handleError(async () => {
       let groupsList = await api.groups.list();
       let group = groupsList.find(group => group.name === name) || null;
       return group;
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
-  api.groups.getIdByName = async function(name) {
-    try {
+  api.groups.getIdByName = async name =>
+    handleError(async () => {
       let foundGroup = await api.groups.findByName(name);
       return foundGroup && foundGroup.id ? foundGroup.id : null;
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
-  api.groups.archive = async function(id) {
-    try {
-      return await parent.slackApi("groups.archive", {
-        group: id
-      });
-    } catch (error) {
-      throw error;
-    }
-  };
+  api.groups.archive = async id =>
+    handleError(
+      async () =>
+        await parent.slackApi("groups.archive", {
+          group: id
+        })
+    );
 
-  api.groups.archiveByName = async function(name) {
-    try {
+  api.groups.archiveByName = async name =>
+    handleError(async () => {
       let id = await api.groups.getIdByName(name);
       return await api.groups.archive(id);
-    } catch (error) {
-      throw error;
-    }
-  };
+    });
 
   // Chat
 
-  api.chat.postMessage = async function(
+  api.chat.postMessage = async (
     {
       username = "SlackAPI",
       channel = "general",
@@ -160,62 +177,21 @@ function Slack(apiToken) {
       unfurl_links = false,
       unfurl_media = false
     } = {}
-  ) {
-    try {
-      return await parent.slackApi("chat.postMessage", {
-        text: text,
-        username: username,
-        channel: `#${channel}`,
-        attachments: JSON.stringify(attachments)
-      });
-    } catch (error) {
-      throw error;
-    }
+  ) => {
+    handleError(
+      async () =>
+        await parent.slackApi("chat.postMessage", {
+          text: text,
+          username: username,
+          channel: `#${channel}`,
+          attachments: JSON.stringify(attachments)
+        })
+    );
   };
 
   api.chat.postBuildMessage = async function(options, template, sourceObject) {
-    try {
-
-      return await api.groups.archive(id);
-    } catch (error) {
-      throw error;
-    }
+    handleError(async () => {});
   };
 
   return api;
 }
-
-let slack = new Slack(
-  "xoxp-216754966870-215791288499-219888067830-7461b1d462416d794ad0a6f7d2bd90f2"
-);
-
-// slack.chat
-//   .postMessage({
-//     username: "Alertes Retards",
-//     text: "Super test!",
-//     channel: "red-testp"
-//   })
-//   .then(res => {
-//     console.log(res);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   });
-
-// slack.channels
-//   .list()
-//   .then(res => {
-//     console.log(res);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   });
-
-// slack.channels
-//   .getIdByName("general")
-//   .then(res => {
-//     console.log(res);
-//   })
-//   .catch(err => {
-//     console.log(err);
-//   });
