@@ -3,7 +3,19 @@
   "version": "0.0.1",
   "description": "wrapper for slack api",
   "main": "slack.js",
-  "author": "Gabin Desserprit",
+  "author": {
+    "name": "Gabin Desserprit",
+    "email": "gabin@datahunter.pro",
+    "url": "http://datahunter.pro"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phelpstream/slack"
+  },
+  "bugs": {
+    "url": "https://github.com/phelpstream/slack/issues"
+  },
+  "keywords": ["slack", "wrapper", "web", "api", "extended", "webhook"],
   "license": "MIT",
   "dependencies": {
     "request": "^2.81.0",
